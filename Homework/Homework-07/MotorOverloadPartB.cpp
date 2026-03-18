@@ -51,6 +51,11 @@ void displayStatus() {
 }
 
 public:
+
+void showStatus() {
+    std::cout << "Motor State:       " << std::bitset<8>(motorState) << "\n";
+    std::cout << "Overheating Motors:" << std::bitset<8>(overheatingMotors) << "\n\n";
+}
     MotorStatus() {
         initialize();
     }
@@ -65,6 +70,25 @@ bool turnOff(uint8_t guess) {
         // 3) Correct guess means guess matches overheatingMotors EXACTLY (same 1-bits).
         // 4) If incorrect guess: call updateOverheating() to add one more overheating motor.
         // 5) Return true ONLY if correct guess.
+// Check if the guess matches the overheating motors exactly
+    bool correct = (guess == overheatingMotors);
+
+    // Turn OFF only motors that are BOTH guessed AND overheating
+    // Clear bits in motorState where guess has 1s
+    motorState &= ~guess;
+
+    if (correct) {
+        // All overheating motors were correctly turned off
+        overheatingMotors = 0;
+        std::cout << "Correct guess! Motors turned off.\n";
+        return true;
+    }
+
+    // Wrong guess → add another overheating motor
+    std::cout << "Wrong guess! Another motor is overheating.\n";
+    updateOverheating();
+    return false;
+
 
         motorState ^= (overheatingMotors & guess);
 
@@ -109,19 +133,46 @@ int  checkInput(const std::string& s) {
 
 int main() {
     MotorStatus motorStatus;
-    uint8_t guess = 0;
+
     std::cout << "Motor Meltdown\n";
-    std::cout << "Enter your guess as:\n";
-    std::cout << "  - 8-bit binary (e.g., 00101000)\n";
-    std::cout << "  - hex (e.g., 0x28)\n";
-    std::cout << "Type 'q' to quit.\n\n";
-    std::cout << "Your guess: ";
-    std::string s;
-    std::cin >> s;
+    std::cout << "Commands:\n";
+    std::cout << "  status        - show motor and overheating bits\n";
+    std::cout << "  q             - quit\n";
+    std::cout << "  bitwise expr  - e.g. (1<<3), (1<<2)|(1<<5)\n";
+    std::cout << "  binary        - e.g. 00101000\n";
+    std::cout << "  hex           - e.g. 0x28\n\n";
 
-    if (!std::cin) return 0;
-    if (s == "q" || s == "Q") return 0;
+    while (true) {
+        std::cout << "Your guess: ";
+        std::string s;
+        std::cin >> s;
 
-    while(checkInput(s)!=-1) {return 0;}
-        
+        if (!std::cin) return 0;
+
+        if (s == "q" || s == "Q")
+            return 0;
+
+        if (s == "status") {
+            motorStatus.showStatus();
+            continue;
+        }
+
+        // Handle bitwise expressions like (1<<3)|(1<<5)
+        if (s.find("<<") != std::string::npos || s.find("|") != std::string::npos) {
+            try {
+                uint8_t value = static_cast<uint8_t>(std::stoi(s, nullptr, 0));
+                motorStatus.turnOff(value);
+            } catch (...) {
+                std::cout << "Invalid bitwise expression.\n";
+            }
+            continue;
+        }
+
+        // Handle binary or hex via checkInput()
+        int value = checkInput(s);
+        if (value == -1)
+            continue;
+
+        motorStatus.turnOff(static_cast<uint8_t>(value));
+    }
 }
