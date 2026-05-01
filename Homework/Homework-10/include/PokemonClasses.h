@@ -1,42 +1,62 @@
-#ifndef POKEMONTYPES_H
-#define POKEMONTYPES_H
+#ifndef POKEMONCLASSES_H
+#define POKEMONCLASSES_H
 
+#include "ElectricPokemon.h"
 #include "Pokemon.h"
 
-// Pikachu class derived from Pokemon
-class Pikachu : public Pokemon {
+// ================= Pikachu =================
+class Pikachu : public ElectricPokemon {
 public:
-    Pikachu(int level) : Pokemon("Pikachu", level) {}
+    Pikachu(int level)
+        : ElectricPokemon("Pikachu", level) {}
 
-    // Override the attack function to provide specific behavior
     void attack() const override {
         std::cout << name << " uses Thunderbolt!" << std::endl;
     }
-    ~Pikachu() {
-        std::cout << name << " you put up a good fight return to the ball" << std::endl;
+
+    void defend() const override {
+        std::cout << name << " dodges quickly!" << std::endl;
+    }
+
+    void evolve() override {
+        std::cout << name << " evolves into Raichu!" << std::endl;
     }
 };
 
-// Charmander class derived from Pokemon
+// ================= Charmander =================
 class Charmander : public Pokemon {
 public:
     Charmander(int level) : Pokemon("Charmander", level) {}
 
-    // Override the attack function to provide specific behavior
     void attack() const override {
         std::cout << name << " uses Flamethrower!" << std::endl;
     }
+
+    void defend() const override {
+        std::cout << name << " shields itself with fire!" << std::endl;
+    }
+
+    void evolve() override {
+        std::cout << name << " evolves into Charmeleon!" << std::endl;
+    }
 };
 
-// Bulbasaur class derived from Pokemon
+// ================= Bulbasaur =================
 class Bulbasaur : public Pokemon {
 public:
     Bulbasaur(int level) : Pokemon("Bulbasaur", level) {}
 
-    // Override the attack function to provide specific behavior
     void attack() const override {
         std::cout << name << " uses Vine Whip!" << std::endl;
     }
+
+    void defend() const override {
+        std::cout << name << " hides behind thick leaves!" << std::endl;
+    }
+
+    void evolve() override {
+        std::cout << name << " evolves into Ivysaur!" << std::endl;
+    }
 };
 
-#endif // POKEMONTYPES_H
+#endif
